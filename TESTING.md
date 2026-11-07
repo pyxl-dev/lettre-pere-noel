@@ -8,6 +8,7 @@
 - Brouillon enregistré automatiquement, retrouvé après rechargement.
 - Souhait long : il passe à la ligne, rien n'est tronqué (desktop et mobile).
 - Entrée dans un souhait crée la ligne suivante. La croix retire la ligne.
+- Détails d'un souhait : « + Détails » (pointillés) quand il n'y en a aucun, sinon « Détails ». Ouvert, l'encart propose « Taille, couleur, prix », « Lien (facultatif) » et « Où le trouver » (300 caractères, plusieurs lignes), et le focus va dans l'encart. Replié, un résumé en pastilles (précision, lieu avec épingle, « lien »). Sur mobile, le bouton passe sous le texte du souhait.
 - Lien de souhait autre que `http(s)` : refusé avec un message clair.
 - Plier sans aucun souhait : refusé, le focus va sur le premier souhait.
 
@@ -29,5 +30,7 @@
 - À l'heure exacte, la page se met à jour seule (sans rechargement).
 - Clic sur l'enveloppe : cachet qui se brise, rabat, lettre qui sort et se déplie, puis lecture. « Passer l'animation » va directement à la fin.
 - Liens des souhaits ouverts dans un nouvel onglet avec `rel="noopener noreferrer"`.
+- Détails à la lecture : « Précision : … », encadré « Où le trouver : … » avec épingle, « voir le lien ». Un champ vide n'affiche rien.
+- Lettre ancienne, écrite avant « Où le trouver » (items sans champ `where` en base) : toujours lisible, ni encadré vide ni « undefined ». `e2e.sh` réécrit la lettre de Bob en base dans ce format avant l'ouverture.
 - Relire sa propre lettre depuis la boîte aux lettres.
 - Autre personne sans lettre : « n'a pas écrit de lettre ».

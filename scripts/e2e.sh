@@ -4,6 +4,7 @@
 #   2. Bob voit la lettre scellée, écrit et envoie la sienne (mobile 375)
 #   3. après la date d'ouverture, Alice ouvre la lettre de Bob (desktop)
 #   4. Bob ouvre celle de Alice (mobile)
+# Entre 2 et 3, la lettre de Bob est réécrite en base sans champ « where » (lettre ancienne).
 # État et mails isolés dans un dossier temporaire ; rien ne part sur Internet.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -68,6 +69,24 @@ run 0-cas-limites-desktop.json 1440x900
 run 1-alice-ecrit-desktop.json 1440x900
 run 2-bob-ecrit-mobile.json 375x812
 kill "$WRANGLER"; wait "$WRANGLER" 2>/dev/null || true
+
+# La lettre de Bob devient une lettre « ancienne » : items sans champ where,
+# comme celles écrites avant son ajout. Elle doit rester lisible.
+db=""
+while IFS= read -r f; do
+  if [ "$(sqlite3 "$f" "SELECT count(*) FROM sqlite_master WHERE name = 'letters'" 2>/dev/null)" = "1" ]; then db=$f; break; fi
+done < <(find "$TMP/state" -name '*.sqlite')
+[ -n "$db" ] || { echo "ÉCHEC : base des lettres introuvable" >&2; exit 1; }
+python3 - "$db" <<'PY'
+import json, sqlite3, sys
+con = sqlite3.connect(sys.argv[1])
+body, = con.execute("SELECT body FROM letters WHERE person = 'b'").fetchone()
+letter = json.loads(body)
+for it in letter["items"]:
+    it.pop("where", None)
+con.execute("UPDATE letters SET body = ? WHERE person = 'b'", (json.dumps(letter),))
+con.commit()
+PY
 
 # Même état, date d'ouverture passée : les lettres s'ouvrent.
 start --var "REVEAL_AT:2026-01-01T00:00:00+01:00"

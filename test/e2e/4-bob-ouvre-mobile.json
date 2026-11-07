@@ -4,5 +4,6 @@
  {"click": "#stage-skip"}, {"wait": 1500},
  {"expect": {"selector": ".reader h1", "text": "La lettre de Alice"}},
  {"expect": {"selector": ".paper", "text": "Un carnet de croquis et des feutres"}},
+ {"expect": {"selector": ".reader .item:nth-child(2) .where", "text": "Où le trouver : Papeterie près de la gare"}},
  {"shot": "rb-lecture-mobile"}
 ]

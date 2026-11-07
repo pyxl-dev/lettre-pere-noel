@@ -1,0 +1,23 @@
+{
+  // Lettre au Père Noël : site statique (public/) + API (src/worker.js) sur Cloudflare Workers.
+  // Les noms, adresses, jetons et identifiants SMTP sont des secrets : voir README.md.
+  "name": "lettre-pere-noel",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-10-01",
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true },
+  "durable_objects": {
+    "bindings": [{ "name": "LETTERS", "class_name": "LettersStore" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["LettersStore"] }],
+  "vars": {
+    // Vendredi 20 novembre 2026, minuit heure de Paris.
+    "REVEAL_AT": "2026-11-20T00:00:00+01:00",
+    "PUBLIC_URL": "https://noel.nizrod.ovh",
+    "MAIL_FROM": "noel@yoanancelly.fr",
+    "SMTP_HOST": "bain.o2switch.net",
+    "SMTP_PORT": "465"
+  },
+  "workers_dev": false,
+  "routes": [{ "pattern": "noel.nizrod.ovh", "custom_domain": true }],
+  "dev": { "port": 8786, "ip": "127.0.0.1" }
+}

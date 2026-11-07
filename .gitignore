@@ -4,3 +4,4 @@ node_modules/
 .smtp-sink/
 .pilote-shots/
 .DS_Store
+.impeccable/

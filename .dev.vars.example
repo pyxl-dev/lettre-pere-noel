@@ -1,0 +1,14 @@
+# Copier en .dev.vars pour `npm run dev` (jamais commité).
+PERSON_A_NAME=Alice
+PERSON_A_EMAIL=a@example.test
+PERSON_A_TOKEN=jeton-dev-personne-a-0001
+PERSON_B_NAME=Bob
+PERSON_B_EMAIL=b@example.test
+PERSON_B_TOKEN=jeton-dev-personne-b-0002
+PUBLIC_URL=http://127.0.0.1:8786
+# Mails vers le faux serveur SMTP local (npm run sink) : rien ne part sur Internet.
+SMTP_HOST=127.0.0.1
+SMTP_PORT=2526
+SMTP_SECURE=off
+SMTP_USER=dev
+SMTP_PASS=dev

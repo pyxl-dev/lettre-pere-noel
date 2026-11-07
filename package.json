@@ -1,0 +1,20 @@
+{
+  "name": "lettre-pere-noel",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Deux lettres au Père Noël, scellées jusqu'au jour J, puis ouvertes avec une animation.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "wrangler dev",
+    "sink": "node scripts/smtp-sink.mjs",
+    "test": "node --test test/*.test.mjs",
+    "e2e": "bash scripts/e2e.sh",
+    "tokens": "node scripts/new-tokens.mjs",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1",
+    "wrangler": "4.158.0"
+  }
+}

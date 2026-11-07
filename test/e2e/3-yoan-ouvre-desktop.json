@@ -1,0 +1,18 @@
+[
+ {"goto": "/?e2e=1#t=jeton-dev-personne-a-0001"}, {"wait": 1500},
+ {"expect": {"selector": ".box h1", "text": "Les lettres sont ouvertes"}},
+ {"shot": "ra-boite-ouverte"},
+ {"click": "[aria-label='Ouvrir la lettre de Marie']"},
+ {"wait": 1300}, {"shot": "ra-cachet-brise"},
+ {"wait": 1200}, {"shot": "ra-rabat-ouvert"},
+ {"wait": 1300}, {"shot": "ra-lettre-sort"},
+ {"wait": 1100}, {"shot": "ra-depliage"},
+ {"wait": 2500}, {"shot": "ra-lecture"},
+ {"expect": {"selector": ".reader h1", "text": "La lettre de Marie"}},
+ {"expect": {"selector": ".paper", "text": "Des places de concert"}},
+ {"click": "text=Boîte aux lettres"}, {"wait": 500},
+ {"click": "[aria-label='Relire ta lettre']"}, {"wait": 500},
+ {"expect": {"selector": ".paper a.chip", "count": 1}},
+ {"eval": "document.querySelector('.paper a.chip').rel", "equals": "noopener noreferrer"},
+ {"shot": "ra-relire-mienne"}
+]

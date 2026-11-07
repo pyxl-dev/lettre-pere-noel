@@ -1,0 +1,8 @@
+[
+ {"goto": "/?e2e=1#t=jeton-dev-personne-b-0002"}, {"wait": 1500},
+ {"click": "[aria-label='Ouvrir la lettre de Yoan']"},
+ {"click": "#stage-skip"}, {"wait": 1500},
+ {"expect": {"selector": ".reader h1", "text": "La lettre de Yoan"}},
+ {"expect": {"selector": ".paper", "text": "Un carnet de croquis et des feutres"}},
+ {"shot": "rb-lecture-mobile"}
+]

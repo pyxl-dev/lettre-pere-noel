@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#10203a">
+  <title>Lettre au Père Noël</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/app.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" data-nav="home">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="3" y="8" width="28" height="19" rx="2" fill="#f6efe2"/><path d="M3 9 L17 19 L31 9" fill="none" stroke="#1d2b4f" stroke-width="1.6"/><circle cx="17" cy="20" r="5" fill="#a8232b"/></svg>
+      <span>Lettre au Père Noël</span>
+    </a>
+    <nav class="topnav" aria-label="Navigation" hidden>
+      <a href="#" data-nav="write" id="nav-write">Ma lettre</a>
+      <a href="#" data-nav="box" id="nav-box">Boîte aux lettres</a>
+    </nav>
+    <p class="pill" id="pill" hidden></p>
+  </header>
+
+  <main id="app" tabindex="-1">
+    <p class="loading">Le facteur arrive…</p>
+  </main>
+
+  <div class="stage" id="stage" hidden>
+    <div class="stage-frame" id="stage-frame"></div>
+    <div class="stage-actions" id="stage-actions"></div>
+    <button type="button" class="stage-skip" id="stage-skip">Passer l'animation</button>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

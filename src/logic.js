@@ -4,7 +4,8 @@ export const LIMITS = {
   items: 30,
   itemText: 200,
   itemLink: 500,
-  itemNote: 40,
+  itemNote: 80,
+  itemWhere: 300,
   intro: 600,
   ps: 600,
   signature: 60,
@@ -92,9 +93,11 @@ export function cleanLetter(input) {
     const text = cleanText(it.text, LIMITS.itemText);
     const link = cleanLink(it.link);
     const note = cleanText(it.note, LIMITS.itemNote);
-    if (!text && !link && !note) continue;
+    // « Où le trouver » : absent des lettres écrites avant son ajout, donc facultatif.
+    const where = cleanText(it.where, LIMITS.itemWhere, { multiline: true });
+    if (!text && !link && !note && !where) continue;
     if (!text) throw new LetterError("Chaque souhait a besoin d'un texte.");
-    items.push({ text, link, note });
+    items.push({ text, link, note, where });
   }
   return {
     intro: cleanText(input.intro, LIMITS.intro, { multiline: true }),

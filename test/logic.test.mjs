@@ -50,7 +50,7 @@ test("cleanLetter nettoie, ignore les lignes vides et valide les liens", () => {
   const l = cleanLetter({
     intro: "  Bonjour\r\nPère Noël \u0007",
     items: [
-      { text: " Un pull ", link: "https://exemple.fr/pull", note: "taille M" },
+      { text: " Un pull ", link: "https://exemple.fr/pull", note: "taille M", where: " Grand magasin,\r\n3e étage " },
       { text: "", link: "", note: "" },
       { text: "Un livre" },
     ],
@@ -59,8 +59,8 @@ test("cleanLetter nettoie, ignore les lignes vides et valide les liens", () => {
   });
   assert.equal(l.intro, "Bonjour\nPère Noël");
   assert.deepEqual(l.items, [
-    { text: "Un pull", link: "https://exemple.fr/pull", note: "taille M" },
-    { text: "Un livre", link: "", note: "" },
+    { text: "Un pull", link: "https://exemple.fr/pull", note: "taille M", where: "Grand magasin,\n3e étage" },
+    { text: "Un livre", link: "", note: "", where: "" },
   ]);
 });
 
@@ -71,6 +71,17 @@ test("cleanLetter refuse les liens dangereux et les textes trop longs", () => {
   assert.throws(() => cleanLetter({ items: [{ text: "", link: "https://a.fr" }] }), LetterError);
   assert.throws(() => cleanLetter({ items: Array.from({ length: 31 }, () => ({ text: "x" })) }), LetterError);
   assert.throws(() => cleanLetter(null), LetterError);
+});
+
+test("« Où le trouver » : limité à 300 caractères, et exige un texte de souhait", () => {
+  assert.throws(() => cleanLetter({ items: [{ text: "x", where: "y".repeat(301) }] }), LetterError);
+  assert.throws(() => cleanLetter({ items: [{ text: "", where: "Rayon 3" }] }), LetterError);
+  assert.equal(cleanLetter({ items: [{ text: "x", note: "n".repeat(80) }] }).items[0].note.length, 80);
+});
+
+test("une lettre écrite avant « Où le trouver » reste valide", () => {
+  const old = cleanLetter({ items: [{ text: "Un livre", link: "", note: "" }] });
+  assert.deepEqual(old.items, [{ text: "Un livre", link: "", note: "", where: "" }]);
 });
 
 test("une lettre sans souhait ne part pas", () => {

@@ -64,6 +64,16 @@ const icon = {
   send: (color) =>
     s("svg", { width: 18, height: 18, viewBox: "0 0 18 18", "aria-hidden": "true" },
       s("path", { d: "M2 9 L16 2 L12 16 L9 10 Z", fill: "none", stroke: color, "stroke-width": "1.6", "stroke-linejoin": "round" })),
+  pin: () =>
+    s("svg", { class: "pin", width: 12, height: 14, viewBox: "0 0 12 14", "aria-hidden": "true" },
+      s("path", { d: "M6 13 C 6 13 1.5 8.5 1.5 5.5 a4.5 4.5 0 0 1 9 0 C 10.5 8.5 6 13 6 13 Z", fill: "none", stroke: "currentColor", "stroke-width": "1.4" }),
+      s("circle", { cx: "6", cy: "5.5", r: "1.6", fill: "currentColor" })),
+  chevronDown: () =>
+    s("svg", { width: 12, height: 12, viewBox: "0 0 12 12", "aria-hidden": "true" },
+      s("path", { d: "M3 4.5 L6 7.5 L9 4.5", fill: "none", stroke: "currentColor", "stroke-width": "1.6", "stroke-linecap": "round" })),
+  chevronUp: () =>
+    s("svg", { width: 12, height: 12, viewBox: "0 0 12 12", "aria-hidden": "true" },
+      s("path", { d: "M3 7.5 L6 4.5 L9 7.5", fill: "none", stroke: "currentColor", "stroke-width": "1.6", "stroke-linecap": "round" })),
   back: () =>
     s("svg", { width: 16, height: 16, viewBox: "0 0 16 16", "aria-hidden": "true" },
       s("path", { d: "M10 3 L5 8 L10 13", fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round" })),
@@ -250,19 +260,20 @@ function letterDate(sentAt) {
 
 function paperView(letter, { date, links = true, extraClass = "" } = {}) {
   const items = h("ol", { class: "items" },
-    letter.items.map((it) =>
-      h("li", { class: "item" },
-        icon.star(),
-        h("span", { class: "text" }, it.text),
-        it.note || it.link
-          ? h("span", { class: "meta" },
-              it.note ? h("span", { class: "chip" }, it.note) : null,
-              it.link
-                ? links
-                  ? h("a", { class: "chip", href: safeHref(it.link), target: "_blank", rel: "noopener noreferrer" }, "voir le lien")
-                  : h("span", { class: "chip" }, "lien")
-                : null)
-          : null)));
+    letter.items.map((it) => {
+      const where = it.where || "";
+      const extra = it.note || where || it.link
+        ? h("div", { class: "item-details" },
+            it.note ? h("p", { class: "detail" }, h("strong", {}, "Précision : "), it.note) : null,
+            where ? h("div", { class: "detail where" }, icon.pin(), h("p", {}, h("strong", {}, "Où le trouver : "), where)) : null,
+            it.link
+              ? links
+                ? h("a", { class: "chip", href: safeHref(it.link), target: "_blank", rel: "noopener noreferrer" }, "voir le lien")
+                : h("span", { class: "chip" }, "lien")
+              : null)
+        : null;
+      return h("li", { class: "item" }, h("div", { class: "item-head" }, icon.star(), h("span", { class: "text" }, it.text)), extra);
+    }));
   return h("article", { class: `paper read ${extraClass}` },
     h("p", { class: "date" }, date),
     h("p", { class: "dear" }, "Cher Père Noël,"),
@@ -301,7 +312,7 @@ function autosize(el) {
 
 function renderWrite() {
   draft = structuredClone(state.mine.letter);
-  if (!draft.items.length) draft.items.push({ text: "", link: "", note: "" });
+  if (!draft.items.length) draft.items.push(blankItem());
 
   const status = h("span", { class: "save-status", role: "status" }, state.mine.updatedAt ? "Brouillon enregistré" : "");
   const list = h("ol", { class: "items" });
@@ -329,10 +340,12 @@ function renderWrite() {
     scheduleSave(status);
   });
 
-  const renderItems = (focusIndex) => {
+  // focus : index du souhait à focaliser, ou { index, selector } pour un champ de ses détails.
+  const renderItems = (focusIndex, focus) => {
     list.replaceChildren(...draft.items.map((it, i) => itemRow(it, i, status, renderItems)));
     list.querySelectorAll("textarea.text").forEach(autosize);
-    if (focusIndex != null) list.querySelectorAll(".text")[focusIndex]?.focus();
+    if (focus) list.children[focus.index]?.querySelector(focus.selector)?.focus();
+    else if (focusIndex != null) list.querySelectorAll(".text")[focusIndex]?.focus();
   };
   renderItems();
 
@@ -341,7 +354,7 @@ function renderWrite() {
     class: "btn-add",
     onclick: () => {
       if (draft.items.length >= 30) return toast("30 souhaits au plus. Le traîneau a ses limites.");
-      draft.items.push({ text: "", link: "", note: "" });
+      draft.items.push(blankItem());
       renderItems(draft.items.length - 1);
     },
   }, icon.plus(), "Ajouter un souhait");
@@ -380,7 +393,17 @@ function renderWrite() {
   autosize(ps);
 }
 
+const blankItem = () => ({ text: "", link: "", note: "", where: "" });
+const hasDetails = (it) => Boolean(it.note || it.link || it.where);
+// Souhaits dont l'encart « Détails » est ouvert (pendant l'écriture seulement).
+const openDetails = new WeakSet();
+
+function field(label, control, hint, extra = "") {
+  return h("label", { class: `field ${extra}`.trim() }, h("span", { class: "field-label" }, label), control, hint ? h("span", { class: "field-hint" }, hint) : null);
+}
+
 function itemRow(it, i, status, rerender) {
+  const open = openDetails.has(it);
   const text = h("textarea", { class: "text", rows: 1, maxlength: 200, placeholder: "Un souhait…", "aria-label": `Souhait ${i + 1}`, autocomplete: "off" });
   text.value = it.text;
   text.addEventListener("input", () => {
@@ -392,34 +415,78 @@ function itemRow(it, i, status, rerender) {
     if (e.key === "Enter") {
       e.preventDefault();
       if (draft.items.length >= 30) return;
-      draft.items.splice(i + 1, 0, { text: "", link: "", note: "" });
+      draft.items.splice(i + 1, 0, blankItem());
       rerender(i + 1);
     }
   });
-  const link = h("input", { class: "link", type: "url", maxlength: 500, placeholder: "lien (facultatif)", "aria-label": `Lien du souhait ${i + 1}`, autocomplete: "off" });
-  link.value = it.link;
-  link.addEventListener("input", () => {
-    it.link = link.value;
-    scheduleSave(status);
-  });
-  const note = h("input", { class: "note", type: "text", maxlength: 40, placeholder: "prix, taille…", "aria-label": `Précision du souhait ${i + 1}`, autocomplete: "off" });
-  note.value = it.note;
-  note.addEventListener("input", () => {
-    it.note = note.value;
-    scheduleSave(status);
-  });
+
+  const toggle = h("button", {
+    type: "button",
+    class: `details-btn${open ? " open" : hasDetails(it) ? "" : " empty"}`,
+    "aria-expanded": open ? "true" : "false",
+    "aria-label": `${open ? "Replier" : "Détails"} du souhait ${i + 1}`,
+    onclick: () => {
+      if (open) openDetails.delete(it);
+      else openDetails.add(it);
+      rerender(null, open ? null : { index: i, selector: ".details textarea, .details input" });
+    },
+  }, open ? "Replier" : hasDetails(it) ? "Détails" : "+ Détails", open ? icon.chevronUp() : hasDetails(it) ? icon.chevronDown() : null);
+
   const remove = h("button", {
     type: "button",
     class: "icon-btn",
     "aria-label": `Retirer le souhait ${i + 1}`,
     onclick: () => {
       draft.items.splice(i, 1);
-      if (!draft.items.length) draft.items.push({ text: "", link: "", note: "" });
+      if (!draft.items.length) draft.items.push(blankItem());
       rerender(Math.min(i, draft.items.length - 1));
       scheduleSave(status);
     },
   }, icon.cross());
-  return h("li", { class: "item" }, icon.star(), text, h("span", { class: "meta" }, link, note, remove));
+
+  const head = h("div", { class: "item-head" }, icon.star(), text, toggle, remove);
+  let body = null;
+  if (open) {
+    const note = h("input", { type: "text", maxlength: 80, autocomplete: "off" });
+    note.value = it.note;
+    note.addEventListener("input", () => {
+      it.note = note.value;
+      scheduleSave(status);
+    });
+    const link = h("input", { type: "url", maxlength: 500, placeholder: "https://…", autocomplete: "off" });
+    link.value = it.link;
+    link.addEventListener("input", () => {
+      it.link = link.value;
+      scheduleSave(status);
+    });
+    const where = h("textarea", { rows: 2, maxlength: 300, autocomplete: "off" });
+    where.value = it.where || "";
+    where.addEventListener("input", () => {
+      it.where = where.value;
+      scheduleSave(status);
+    });
+    body = h("div", { class: "details" },
+      field("Taille, couleur, prix", note),
+      field("Lien (facultatif)", link),
+      field("Où le trouver", where, "Boutique, adresse, étage, rayon, ce qu'il faut demander au vendeur…", "wide"));
+  } else if (hasDetails(it)) {
+    body = h("div", { class: "chips" }, detailChips(it));
+  }
+  return h("li", { class: `item edit${open ? " is-open" : ""}` }, head, body);
+}
+
+function shorten(str, max) {
+  const one = str.replace(/\s+/g, " ");
+  return one.length > max ? `${one.slice(0, max - 1)}…` : one;
+}
+
+// Pastilles de résumé d'un souhait replié.
+function detailChips(it) {
+  return [
+    it.note ? h("span", { class: "chip" }, it.note) : null,
+    it.where ? h("span", { class: "chip" }, icon.pin(), shorten(it.where, 40)) : null,
+    it.link ? h("span", { class: "chip chip-link" }, "lien") : null,
+  ];
 }
 
 function payload() {
@@ -427,7 +494,7 @@ function payload() {
     intro: draft.intro,
     ps: draft.ps,
     signature: draft.signature,
-    items: draft.items.filter((it) => it.text.trim() || it.link.trim() || it.note.trim()),
+    items: draft.items.filter((it) => it.text.trim() || it.link.trim() || it.note.trim() || (it.where || "").trim()),
   };
 }
 

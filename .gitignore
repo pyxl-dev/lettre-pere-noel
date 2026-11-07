@@ -1,0 +1,6 @@
+node_modules/
+.wrangler/
+.dev.vars
+.smtp-sink/
+.pilote-shots/
+.DS_Store

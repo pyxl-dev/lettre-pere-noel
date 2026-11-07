@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Parcours complet en navigateur headless (scripts/browser-steps.mjs, Playwright) :
-#   1. Yoan écrit et envoie sa lettre (desktop 1440)
-#   2. Marie voit la lettre scellée, écrit et envoie la sienne (mobile 375)
-#   3. après la date d'ouverture, Yoan ouvre la lettre de Marie (desktop)
-#   4. Marie ouvre celle de Yoan (mobile)
+#   1. Alice écrit et envoie sa lettre (desktop 1440)
+#   2. Bob voit la lettre scellée, écrit et envoie la sienne (mobile 375)
+#   3. après la date d'ouverture, Alice ouvre la lettre de Bob (desktop)
+#   4. Bob ouvre celle de Alice (mobile)
 # État et mails isolés dans un dossier temporaire ; rien ne part sur Internet.
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -22,10 +22,10 @@ cleanup() {
 trap cleanup EXIT
 
 cat > "$TMP/e2e.env" <<VARS
-PERSON_A_NAME=Yoan
+PERSON_A_NAME=Alice
 PERSON_A_EMAIL=a@example.test
 PERSON_A_TOKEN=jeton-dev-personne-a-0001
-PERSON_B_NAME=Marie
+PERSON_B_NAME=Bob
 PERSON_B_EMAIL=b@example.test
 PERSON_B_TOKEN=jeton-dev-personne-b-0002
 PUBLIC_URL=$BASE
@@ -64,14 +64,15 @@ run() {
 }
 
 start
-run 1-yoan-ecrit-desktop.json 1440x900
-run 2-marie-ecrit-mobile.json 375x812
+run 0-cas-limites-desktop.json 1440x900
+run 1-alice-ecrit-desktop.json 1440x900
+run 2-bob-ecrit-mobile.json 375x812
 kill "$WRANGLER"; wait "$WRANGLER" 2>/dev/null || true
 
 # Même état, date d'ouverture passée : les lettres s'ouvrent.
 start --var "REVEAL_AT:2026-01-01T00:00:00+01:00"
-run 3-yoan-ouvre-desktop.json 1440x900
-run 4-marie-ouvre-mobile.json 375x812
+run 3-alice-ouvre-desktop.json 1440x900
+run 4-bob-ouvre-mobile.json 375x812
 
 mails=$(ls "$TMP/mails"/*.json 2>/dev/null | wc -l | tr -d ' ')
 if [ "$mails" != "2" ]; then

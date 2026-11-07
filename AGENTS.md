@@ -15,7 +15,7 @@ You are an AI coding agent working on **Lettre au Père Noël**: a Cloudflare Wo
 
 ## Rules
 
-- **Never** commit `.dev.vars`, real names, email addresses, tokens or SMTP credentials. They are Worker secrets (`wrangler secret put`). The repository is meant to be public.
+- **Never** commit `.dev.vars`, the two people's names or email addresses, tokens or SMTP credentials. They are Worker secrets (`wrangler secret put`). Tests and fixtures use Alice, Bob and `example.test`. The repository is meant to be public. The sender address, domain and SMTP host in `wrangler.jsonc` are the maintainer's public infrastructure, not personal data.
 - The server enforces the guarantees: a sent letter is frozen (HTTP 409), the partner letter is only returned once `isRevealed()` is true, links must be `http(s)`. Never move one of these checks to the browser only.
 - The Content-Security-Policy forbids inline `style` attributes and inline scripts. Set styles with classes, or with `element.style.x = …` from JS.
 - Render user text with `textContent` (the `h()` helper does this). Never `innerHTML` with letter content.

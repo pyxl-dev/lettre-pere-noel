@@ -3,7 +3,7 @@
  {"expect": {"selector": ".card .status", "text": "Envoyée, scellée"}},
  {"click": "#nav-box"}, {"wait": 600},
  {"expect": {"selector": ".slot", "text": "Scellée jusqu'au vendredi 20 novembre"}},
- {"click": "[aria-label^='La lettre de Yoan']"}, {"wait": 300},
+ {"click": "[aria-label^='La lettre de Alice']"}, {"wait": 300},
  {"expect": {"selector": ".toast.show", "text": "Patience"}},
  {"shot": "b-boite-scellee"},
  {"eval": "document.body.innerText.includes('carnet de croquis')", "equals": false},
@@ -20,7 +20,7 @@
  {"wait": 6000}, {"shot": "b-enveloppe-scellee"},
  {"click": "text=Envoyer au Père Noël"},
  {"wait": 3000}, {"shot": "b-boite"},
- {"expect": {"selector": ".toast.show", "text": "Yoan a reçu un mail"}},
+ {"expect": {"selector": ".toast.show", "text": "Alice a reçu un mail"}},
  {"eval": "fetch('/api/letter',{method:'PUT',headers:{authorization:'Bearer jeton-dev-personne-b-0002','content-type':'application/json'},body:JSON.stringify({items:[{text:'triche'}]})}).then(r=>r.status)", "equals": 409},
  {"eval": "fetch('/api/send',{method:'POST',headers:{authorization:'Bearer jeton-dev-personne-b-0002','content-type':'application/json'},body:JSON.stringify({items:[{text:'triche'}]})}).then(r=>r.status)", "equals": 409}
 ]

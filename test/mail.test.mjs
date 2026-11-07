@@ -4,9 +4,9 @@ import { notify } from "../src/mail.js";
 import { profile } from "../src/logic.js";
 
 const env = {
-  PERSON_A_NAME: "Yoan",
+  PERSON_A_NAME: "Alice",
   PERSON_A_TOKEN: "jeton-personne-a-0001",
-  PERSON_B_NAME: "Marie",
+  PERSON_B_NAME: "Bob",
   PERSON_B_EMAIL: "b@example.test",
   PERSON_B_TOKEN: "jeton-personne-b-0002",
   PUBLIC_URL: "https://noel.example.test",

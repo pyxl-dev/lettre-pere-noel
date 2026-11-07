@@ -419,7 +419,7 @@ main { outline: none; }
 
 @keyframes glow {
   0%, 100% { filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.35)); transform: translateY(0); }
-  50% { filter: drop-shadow(0 0 22px rgba(231, 199, 127, 0.55)); transform: translateY(-4px); }
+  50% { filter: drop-shadow(0 20px 22px rgba(0, 0, 0, 0.45)); transform: translateY(-6px); }
 }
 
 .slot h2 { margin: 0; font-family: var(--serif); font-size: 20px; }

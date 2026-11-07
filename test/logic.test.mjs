@@ -13,10 +13,10 @@ import {
 } from "../src/logic.js";
 
 const env = {
-  PERSON_A_NAME: "Yoan",
+  PERSON_A_NAME: "Alice",
   PERSON_A_EMAIL: "a@example.test",
   PERSON_A_TOKEN: "jeton-personne-a-0001",
-  PERSON_B_NAME: "Marie",
+  PERSON_B_NAME: "Bob",
   PERSON_B_EMAIL: "b@example.test",
   PERSON_B_TOKEN: "jeton-personne-b-0002",
   REVEAL_AT: "2026-11-20T00:00:00+01:00",
@@ -79,14 +79,14 @@ test("une lettre sans souhait ne part pas", () => {
 });
 
 test("le mail contient le lien personnel du destinataire, échappé en HTML", () => {
-  const from = profile({ ...env, PERSON_A_NAME: "Yo<b>an" }, "a");
+  const from = profile({ ...env, PERSON_A_NAME: "Al<b>ice" }, "a");
   const to = profile(env, "b");
   const mail = notificationMail({ env, from, to, now: Date.parse("2026-11-07T10:00:00Z") });
-  assert.match(mail.subject, /Yo<b>an t'a écrit une lettre au Père Noël/);
+  assert.match(mail.subject, /Al<b>ice t'a écrit une lettre au Père Noël/);
   assert.ok(mail.text.includes("https://noel.example.test/#t=jeton-personne-b-0002"));
   assert.ok(!mail.text.includes("jeton-personne-a-0001"), "jamais le jeton de l'expéditeur");
   assert.match(mail.text, /scellée jusqu'au vendredi 20 novembre/);
-  assert.ok(mail.html.includes("Yo&lt;b&gt;an"));
+  assert.ok(mail.html.includes("Al&lt;b&gt;ice"));
   const after = notificationMail({ env, from, to, now: Date.parse("2026-11-21T10:00:00Z") });
   assert.match(after.text, /déjà ouvertes/);
 });

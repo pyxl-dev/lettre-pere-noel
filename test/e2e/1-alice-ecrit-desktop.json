@@ -22,7 +22,7 @@
  {"click": "text=Envoyer au Père Noël"},
  {"wait": 500}, {"shot": "a-envol"},
  {"wait": 2500}, {"shot": "a-boite"},
- {"expect": {"selector": ".toast.show", "text": "Marie a reçu un mail"}},
+ {"expect": {"selector": ".toast.show", "text": "Bob a reçu un mail"}},
  {"expect": {"selector": ".slot h2", "count": 2}},
- {"expect": {"selector": ".slot", "text": "Marie n'a pas encore envoyé sa lettre"}}
+ {"expect": {"selector": ".slot", "text": "Bob n'a pas encore envoyé sa lettre"}}
 ]

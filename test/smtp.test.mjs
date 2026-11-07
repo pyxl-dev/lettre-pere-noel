@@ -46,7 +46,7 @@ test("envoie un mail UTF-8 complet au serveur SMTP", async () => {
     from: "noel@example.test",
     fromName: "Lettre au Père Noël",
     to: "b@example.test",
-    subject: "Yoan t'a écrit une lettre au Père Noël",
+    subject: "Alice t'a écrit une lettre au Père Noël",
     text: "Bonjour,\n.ligne qui commence par un point\nfin",
     html: "<p>Bonjour</p>",
   });
@@ -59,7 +59,7 @@ test("envoie un mail UTF-8 complet au serveur SMTP", async () => {
   const raw = fs.readFileSync(path.join(dir, files[0].replace(".json", ".eml")), "utf8");
   assert.match(raw, /^Subject: =\?UTF-8\?B\?/m);
   const subject = /^Subject: =\?UTF-8\?B\?(.+)\?=$/m.exec(raw)[1];
-  assert.equal(Buffer.from(subject, "base64").toString("utf8"), "Yoan t'a écrit une lettre au Père Noël");
+  assert.equal(Buffer.from(subject, "base64").toString("utf8"), "Alice t'a écrit une lettre au Père Noël");
   assert.equal(decodePart(raw, "text/plain"), "Bonjour,\n.ligne qui commence par un point\nfin");
   assert.equal(decodePart(raw, "text/html"), "<p>Bonjour</p>");
 });

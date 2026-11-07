@@ -16,7 +16,7 @@
 - Pliage en trois, glissement dans l'enveloppe, rabat, cachet. « Reprendre ma lettre » ramène à l'écriture sans rien envoyer.
 - « Envoyer au Père Noël » : envol, boîte aux lettres, toast. Un mail part vers l'autre personne avec **son** lien, jamais celui de l'expéditeur.
 - Après envoi : `PUT /api/letter` et `POST /api/send` répondent 409.
-- Échec SMTP : la lettre est quand même scellée, le toast le dit, Resend prend le relais si `RESEND_API_KEY` est défini.
+- Échec SMTP : la lettre est quand même scellée, le toast le dit, Resend prend le relais si `RESEND_API_KEY` est défini. La boîte aux lettres affiche « Renvoyer le mail » ; un nouvel `POST /api/send` relance la notification au lieu de répondre 409.
 
 ## Avant l'ouverture
 

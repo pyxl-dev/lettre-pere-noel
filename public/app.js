@@ -211,7 +211,7 @@ function updatePill() {
   }
   const days = Math.floor(ms / 86400000);
   const hours = Math.floor(ms / 3600000);
-  const left = days > 1 ? `dans ${days} jours` : hours > 1 ? `dans ${hours} heures` : "dans moins d'une heure";
+  const left = days > 1 ? `dans ${days} jours` : days === 1 ? "dans 1 jour" : hours > 1 ? `dans ${hours} heures` : "dans moins d'une heure";
   pill.replaceChildren("Ouverture des lettres le ", h("strong", {}, DAY.format(new Date(state.revealAt))), ` · ${left}`);
 }
 
@@ -438,12 +438,15 @@ function scheduleSave(status) {
   saveTimer = setTimeout(() => save(status), 700);
 }
 
+// Les sauvegardes passent l'une après l'autre : un vieux brouillon n'écrase jamais un plus récent.
 async function save(status) {
   saveTimer = null;
-  const run = (async () => {
+  const previous = saving || Promise.resolve();
+  const run = previous.then(async () => {
+    const body = payload();
     try {
-      const r = await api("/api/letter", { method: "PUT", body: payload() });
-      state.mine.letter = payload();
+      const r = await api("/api/letter", { method: "PUT", body });
+      state.mine.letter = body;
       state.mine.updatedAt = r.updatedAt;
       if (status) {
         status.classList.remove("error");
@@ -456,13 +459,17 @@ async function save(status) {
         status.textContent = e.message;
       }
       if (e.status === 409) {
-        await loadState();
-        view = "box";
-        render();
+        try {
+          await loadState();
+          view = "box";
+          render();
+        } catch {
+          // l'erreur est déjà affichée
+        }
       }
       return false;
     }
-  })();
+  });
   saving = run;
   return run;
 }
@@ -674,6 +681,8 @@ async function foldAndSend(btn, status) {
   }
 
   let result;
+  // Une fois « Envoyer » cliqué, on ne peut plus reprendre la lettre : seul le bouton d'envoi reste.
+  stageActions.replaceChildren(choice, document.getElementById("stage-hint"));
   for (;;) {
     choice.disabled = true;
     choice.lastChild.textContent = "Envoi au Pôle Nord…";
@@ -685,6 +694,12 @@ async function foldAndSend(btn, status) {
         result = { mail: "already" };
         break;
       }
+      if (e.status === 400) {
+        document.getElementById("stage-hint").textContent = e.message;
+        choice.remove();
+        stageActions.append(h("button", { type: "button", class: "btn btn-ghost", onclick: closeStage }, "Corriger ma lettre"));
+        return;
+      }
       document.getElementById("stage-hint").textContent = e.message;
       choice.disabled = false;
       choice.lastChild.textContent = "Réessayer l'envoi";
@@ -694,7 +709,11 @@ async function foldAndSend(btn, status) {
   stageActions.replaceChildren();
   await flyAway(sc);
   closeStage();
-  await loadState();
+  try {
+    await loadState();
+  } catch {
+    state.mine.sentAt = result.sentAt || new Date(now()).toISOString();
+  }
   view = "box";
   render();
   if (result.mail === "sent" || result.mail === "logged") toast(`Lettre envoyée au Père Noël. ${partner} a reçu un mail.`);
@@ -714,7 +733,8 @@ function renderBox() {
     ? h("div", { class: "slot" },
         h("button", { type: "button", class: "env-btn", "aria-label": "Relire ta lettre", onclick: () => go("read-mine") }, envSmall({ label: `de ${me}` })),
         h("h2", {}, "Ta lettre"),
-        h("p", {}, `Envoyée le ${DAY.format(new Date(state.mine.sentAt))}. Clique dessus pour la relire.`))
+        h("p", {}, `Envoyée le ${DAY.format(new Date(state.mine.sentAt))}. Clique dessus pour la relire.`),
+        mailRetry())
     : h("div", { class: "slot" },
         h("div", { class: "env-btn" }, envSmall({ empty: true })),
         h("h2", {}, "Ta lettre"),
@@ -758,6 +778,33 @@ function renderBox() {
 
   app.replaceChildren(h("section", { class: "box" }, h("div", {}, head), countdown, h("div", { class: "slots" }, theirs, mine)));
   if (countdown) fillCountdown(countdown);
+}
+
+// Le mail de notification n'est pas parti : on propose de le renvoyer.
+function mailRetry() {
+  if (["sent", "logged", "skipped"].includes(state.mine.mailStatus)) return null;
+  const btn = h("button", {
+    type: "button",
+    class: "btn btn-ghost",
+    onclick: async () => {
+      btn.disabled = true;
+      try {
+        const r = await api("/api/send", { method: "POST", body: state.mine.letter });
+        state.mine.mailStatus = r.mail;
+      } catch (e) {
+        if (e.status !== 409) {
+          toast(e.message);
+          btn.disabled = false;
+          return;
+        }
+        state.mine.mailStatus = "sent";
+      }
+      if (state.mine.mailStatus === "sent" || state.mine.mailStatus === "logged") toast(`Mail envoyé à ${state.partner.name}.`);
+      else toast("Le mail ne part toujours pas. Réessaie plus tard.");
+      render();
+    },
+  }, `Renvoyer le mail à ${state.partner.name}`);
+  return h("div", {}, h("p", {}, `Le mail pour ${state.partner.name} n'est pas parti.`), btn);
 }
 
 async function reveal() {
